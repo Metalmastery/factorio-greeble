@@ -1,0 +1,31 @@
+-- In your mod's control.lua or data.lua:
+--
+--
+--
+--
+--
+--
+--
+--
+-- local Tile = require("pattern_gen/tile").Tile
+-- local Importer = require("pattern_gen/importer").Importer
+-- local WFC = require("pattern_gen/wfc").WFC
+
+-- -- Example usage:
+-- local importer = Importer.new(3)
+-- local result = importer:importBlueprint(blueprint_data)
+
+-- local wfc = WFC.new(10, 10, result.tilesMap, {})
+-- wfc:buildGrid()
+
+-- -- Place tiles on surface
+-- for _, cell in ipairs(wfc.grid) do
+--     if cell.isCollapsed and cell.tileId then
+--         local tile = result.tilesMap[cell.tileId]
+--         -- Place tile at position
+--         surface.set_tiles({ {
+--             name = result.namesMap.inverseNames[tile.data[2][2]], -- center tile
+--             position = { cell.x, cell.y }
+--         } })
+--     end
+-- end

@@ -1,0 +1,65 @@
+{
+    "blueprint": {
+        "icons": [
+            {
+                "signal": {
+                    "name": "hazard-concrete"
+                },
+                "index": 1
+            }
+        ],
+        "tiles": [
+            {
+                "position": {
+                    "x": 703,
+                    "y": -136
+                },
+                "name": "hazard-concrete-right"
+            },
+            {
+                "position": {
+                    "x": 702,
+                    "y": -135
+                },
+                "name": "refined-concrete"
+            },
+            {
+                "position": {
+                    "x": 703,
+                    "y": -134
+                },
+                "name": "refined-hazard-concrete-right"
+            },
+            {
+                "position": {
+                    "x": 702,
+                    "y": -134
+                },
+                "name": "refined-hazard-concrete-left"
+            },
+            {
+                "position": {
+                    "x": 702,
+                    "y": -138
+                },
+                "name": "stone-path"
+            },
+            {
+                "position": {
+                    "x": 702,
+                    "y": -137
+                },
+                "name": "concrete"
+            },
+            {
+                "position": {
+                    "x": 702,
+                    "y": -136
+                },
+                "name": "hazard-concrete-left"
+            }
+        ],
+        "item": "blueprint",
+        "version": 562949957943296
+    }
+}
