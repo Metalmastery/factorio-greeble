@@ -15,71 +15,71 @@ function Render.new(tilesMap, namesMap, tileSize, spread)
 end
 
 function Render:outlineBox(box, offset, tileName, tilesThrough)
-  offset = offset or 0
-  tileName = tileName or 'concrete'
+    offset = offset or 0
+    tileName = tileName or 'concrete'
 
---   game.print(serpent.line(box))
-  -- offset box around a box
-  local tiles = tilesThrough or {}
-  local offset = offset or 2
-  for x = box.left_top.x - offset, box.right_bottom.x + offset do
-    table.insert(tiles, { position = { x = x, y = box.left_top.y - offset }, name = tileName })
-    table.insert(tiles, { position = { x = x, y = box.right_bottom.y + offset }, name = tileName })
-  end
+    --   game.print(serpent.line(box))
+    -- offset box around a box
+    local tiles = tilesThrough or {}
+    local offset = offset or 2
+    for x = box.left_top.x - offset, box.right_bottom.x + offset do
+        table.insert(tiles, { position = { x = x, y = box.left_top.y - offset }, name = tileName })
+        table.insert(tiles, { position = { x = x, y = box.right_bottom.y + offset }, name = tileName })
+    end
 
-  for y = box.left_top.y - offset, box.right_bottom.y + offset do
-    table.insert(tiles, { position = { x = box.left_top.x - offset, y = y }, name = tileName })
-    table.insert(tiles, { position = { x = box.right_bottom.x + offset, y = y }, name = tileName })
-  end
-  return tiles
+    for y = box.left_top.y - offset, box.right_bottom.y + offset do
+        table.insert(tiles, { position = { x = box.left_top.x - offset, y = y }, name = tileName })
+        table.insert(tiles, { position = { x = box.right_bottom.x + offset, y = y }, name = tileName })
+    end
+    return tiles
 end
 
 function Render:offsetBox(box, offset)
-  return {
-    left_top = { x = box.left_top.x - offset, y = box.left_top.y - offset },
-    right_bottom = { x = box.right_bottom.x + offset, y = box.right_bottom.y + offset },
-  }
+    return {
+        left_top = { x = box.left_top.x - offset, y = box.left_top.y - offset },
+        right_bottom = { x = box.right_bottom.x + offset, y = box.right_bottom.y + offset },
+    }
 end
 
 function Render:fillBox(box, offset, tileName, tilesThrough)
-  offset = offset or 0
-  tileName = tileName or 'concrete'
+    offset = offset or 0
+    tileName = tileName or 'concrete'
 
---   game.print(serpent.line(box))
+    --   game.print(serpent.line(box))
 
-  local tiles = tilesThrough or {}
+    local tiles = tilesThrough or {}
 
-  -- tiling pad under a box
-  for x = box.left_top.x - offset, box.right_bottom.x + offset do
-    for y = box.left_top.y - offset, box.right_bottom.y + offset do
-      table.insert(tiles, { position = { x = x, y = y }, name = tileName })
+    -- tiling pad under a box
+    for x = box.left_top.x - offset, box.right_bottom.x + offset do
+        for y = box.left_top.y - offset, box.right_bottom.y + offset do
+            table.insert(tiles, { position = { x = x, y = y }, name = tileName })
+        end
     end
-  end
 
-  return tiles
+    return tiles
 end
 
 function Render:roundBoxCoordinates(box)
-  -- for _, box in ipairs(boxes) do
-  box.left_top.x = math.floor(box.left_top.x)
-  box.left_top.y = math.floor(box.left_top.y)
-  box.right_bottom.x = math.floor(box.right_bottom.x)
-  box.right_bottom.y = math.floor(box.right_bottom.y)
-  -- end
+    -- for _, box in ipairs(boxes) do
+    box.left_top.x = math.floor(box.left_top.x)
+    box.left_top.y = math.floor(box.left_top.y)
+    box.right_bottom.x = math.floor(box.right_bottom.x)
+    box.right_bottom.y = math.floor(box.right_bottom.y)
+    -- end
 end
 
 function Render:getContainingBox(entities)
-  local combinedBox = entities[1].bounding_box
+    local combinedBox = entities[1].bounding_box
 
-  for _, ent in ipairs(entities) do
-    local box = ent.bounding_box
-    combinedBox.left_top.x = math.min(combinedBox.left_top.x, box.left_top.x)
-    combinedBox.left_top.y = math.min(combinedBox.left_top.y, box.left_top.y)
-    combinedBox.right_bottom.x = math.max(combinedBox.right_bottom.x, box.right_bottom.x)
-    combinedBox.right_bottom.y = math.max(combinedBox.right_bottom.y, box.right_bottom.y)
-  end
+    for _, ent in ipairs(entities) do
+        local box = ent.bounding_box
+        combinedBox.left_top.x = math.min(combinedBox.left_top.x, box.left_top.x)
+        combinedBox.left_top.y = math.min(combinedBox.left_top.y, box.left_top.y)
+        combinedBox.right_bottom.x = math.max(combinedBox.right_bottom.x, box.right_bottom.x)
+        combinedBox.right_bottom.y = math.max(combinedBox.right_bottom.y, box.right_bottom.y)
+    end
 
-  return combinedBox
+    return combinedBox
 end
 
 local function merge_lists(t1, t2)
@@ -91,7 +91,6 @@ end
 
 
 function Render:makeJSON(wfcData, event)
-
     self:roundBoxCoordinates(event.area)
 
     local origin = event.area.left_top
@@ -99,9 +98,9 @@ function Render:makeJSON(wfcData, event)
     local player = game.players[event.player_index]
     local surface = player.surface
 
-    local overlapSetting = settings.global[settings_config.OVERLAP.name].value
-    local avoidBuildings = settings.global[settings_config.AVOID_BUILDINGS.name].value
-    local preserveTiles = settings.global[settings_config.PRESERVE_EXISTING_TILES.name].value
+    local overlapSetting = settings.global[settings_config.RENDER_OVERLAP_TILES.name].value
+    local avoidBuildings = settings.global[settings_config.RENDER_AVOID_BUILDINGS.name].value
+    local preserveTiles = settings.global[settings_config.RENDER_PRESERVE_EXISTING_TILES.name].value
 
     local bpTiles = {}
     -- local tileSize = self.tilesMap[wfcData[1].value or 0].data.length -- fix this mess
@@ -110,6 +109,17 @@ function Render:makeJSON(wfcData, event)
     for _, t in ipairs(wfcData) do
         if t.value then -- handle broken tiles
             local tile = self.tilesMap[t.value]
+            local data = tile.data
+
+            -- -- TODO make it better
+            -- if t.rotated and t.rotated > 0 then
+            --     data = tile.rotations[t.rotated]
+            -- end
+
+            -- if t.reflected and t.reflected > 0 then
+            --     data = tile.reflections[t.reflected]
+            -- end
+
             local startPositionX = 0
             local startPositionY = 0
 
@@ -124,7 +134,7 @@ function Render:makeJSON(wfcData, event)
                             y = t.y * (tileSize + self.spread - startPositionY) + row + origin.y,
                         },
                         name = self.namesMap.inverseNames[
-                            tile.data[row + 1][column + 1]
+                            data[row + 1][column + 1]
                         ],
                     }
                     -- TODO skip tiles under buildings
@@ -148,6 +158,7 @@ function Render:makeJSON(wfcData, event)
 
     return bpTiles
 end
+
 -- for _, ent in ipairs(event.entities) do
 --     local cb = ent.type
 --     if cb then

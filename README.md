@@ -8,8 +8,8 @@ Factorio mod for base decoration. Uses chunked WFC algorithm to fill area with t
 
 # Examples
 
-![](public/screenshots/9.png)
-![](public/screenshots/1.png)
+![](public/screenshots/12.png)
+![](public/screenshots/11.png)
 
 
 ![see video in public/screenshots](public/screenshots/greeble_small.webm)
@@ -26,8 +26,11 @@ Factorio mod for base decoration. Uses chunked WFC algorithm to fill area with t
         More screenshots
     </summary>
 
-| ![](public/screenshots/2.png) | ![](public/screenshots/3.png)  |
+    Left top - input sample, center - generated output
+
+| ![](public/screenshots/9.png) | ![](public/screenshots/1.png)  |
 | :---------------------------: | :----------------------------: |
+| ![](public/screenshots/2.png) | ![](public/screenshots/3.png)  |
 | ![](public/screenshots/4.png) | ![](public/screenshots/5.png)  |
 | ![](public/screenshots/6.png) | ![](public/screenshots/7.png)  |
 | ![](public/screenshots/8.png) | ![](public/screenshots/10.png)  |

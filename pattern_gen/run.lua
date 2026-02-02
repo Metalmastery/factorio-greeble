@@ -7,7 +7,6 @@ local printTable = require("pattern_gen/utils").printTable
 local settings_config = require('pattern_gen/settings_config')
 
 local gridSize = { width = 10, height = 12 }
-local tileSize = 3
 
 local function finishCallback()
 end
@@ -96,6 +95,7 @@ end
 
 function testRun(event, tilesOnly)
     cleanupPreviousRun(event)
+    local tileSize = settings.global[settings_config.IMPORT_TILE_SIZE.name].value
 
     tilesOnly = tilesOnly or false
     -- reset id for tiles?
@@ -109,7 +109,7 @@ function testRun(event, tilesOnly)
     -- TODO build grid based on size, not tiles -> fill up missing spots to alllow sparse templates
     local importedData = importer:importBlueprint({ blueprint = { tiles = template.tiles } })
 
-    local spreadSetting = settings.global[settings_config.SPREAD.name].value
+    local spreadSetting = settings.global[settings_config.RENDER_SPREAD_TILES.name].value
     local render = Render.new(importedData.tilesMap, importedData.namesMap, tileSize, (spreadSetting and 1 or 0))
 
     local result

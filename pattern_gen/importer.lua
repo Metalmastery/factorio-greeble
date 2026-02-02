@@ -112,16 +112,17 @@ function Importer:extractTiles(grid, size)
     local tileMap = {}
     local inc = 1
 
-    local skipIntermediates = settings.global[settings_config.SKIP_INTERMEDIATE.name].value
-    local includeRotationsSetting = settings.global[settings_config.INCLUDE_ROTATED.name].value
-    local includeMirroredSetting = settings.global[settings_config.INCLUDE_MIRRORED.name].value
+    local skipIntermediates = settings.global[settings_config.IMPORT_SKIP_INTERMEDIATE.name].value
+    local includeRotationsSetting = settings.global[settings_config.IMPORT_INCLUDE_ROTATED.name].value
+    local includeMirroredSetting = settings.global[settings_config.IMPORT_INCLUDE_REFLECTED.name].value
 
+    -- TODO implement overlap & skip to work together
     if skipIntermediates then
-        inc = settings.global[settings_config.SKIP_INTERMEDIATE.name].value - 1
+        inc = size
     end
 
-    for y = 1, sourceH - size, inc do
-        for x = 1, sourceW - size, inc do
+    for y = 1, sourceH - size + 1, inc do
+        for x = 1, sourceW - size + 1, inc do
             local tile = Tile.new(size)
 
             -- Extract tile data
@@ -137,7 +138,7 @@ function Importer:extractTiles(grid, size)
             local variations = {}
 
             if includeMirroredSetting then
-                initial = tile:getMirrored()
+                initial = tile:getReflected()
             end
 
             if includeRotationsSetting then
@@ -169,7 +170,6 @@ function Importer:extractTiles(grid, size)
             end
 
             -- game.print(string.format('discarded %s of %s tiles as duplicates for tile %s', discarded, #variations, tile.code))
-
         end
     end
 

@@ -374,6 +374,8 @@ local WFC = {}
 WFC.__index = WFC
 
 function WFC.new(area, tilesMap, rules)
+    local chunkSize = settings.global[settings_config.WFC_CHUNK_SIZE.name].value
+
     local self = setmetatable({}, WFC)
 
     self.ready = false
@@ -404,10 +406,12 @@ function WFC.new(area, tilesMap, rules)
 
     self.neighborsSet = self.neighbors4
 
-    local gridSize = settings.global[settings_config.GRID_SIZE.name].value
-    local chunkSize = settings.global[settings_config.CHUNK_SIZE.name].value
+    self.targetSize = {
+        w = 0,
+        h = 0
+    }
 
-    self.size = self:getGridSizeFromArea(area)
+    self.size, self.targetSize = self:getGridSizeFromArea(area)
 
     self.chunkSize = {
         w = chunkSize,
@@ -432,6 +436,12 @@ end
 
 -- #tag getGridSizeFromArea
 function WFC:getGridSizeFromArea(area)
+    local chunkSize = settings.global[settings_config.WFC_CHUNK_SIZE.name].value
+    local tileSize = settings.global[settings_config.IMPORT_TILE_SIZE.name].value
+    local tileOverlap = settings.global[settings_config.RENDER_OVERLAP_TILES.name].value
+    local verticalSymmetry = settings.global[settings_config.WFC_SYMMETRY_VERTICAL.name].value
+    local horizontalSymmetry = settings.global[settings_config.WFC_SYMMETRY_HORIZONTAL.name].value
+
     -- size in tiles
     local areaSize = {
         w = math.floor(area.right_bottom.x) - math.floor(area.left_top.x),
@@ -439,10 +449,6 @@ function WFC:getGridSizeFromArea(area)
     }
 
     game.print(string.format('!!! area size %s %s', areaSize.w, areaSize.h))
-
-    local chunkSize = settings.global[settings_config.CHUNK_SIZE.name].value
-    local tileSize = settings.global[settings_config.TILE_SIZE.name].value
-    local tileOverlap = settings.global[settings_config.OVERLAP.name].value
 
     local rawGridSize = {
         w = math.ceil(areaSize.w / tileSize),
@@ -455,6 +461,21 @@ function WFC:getGridSizeFromArea(area)
             h = math.ceil(areaSize.h / (tileSize - 1))
         }
     end
+
+    local targetSize = {
+        w = math.ceil(rawGridSize.w / chunkSize) * chunkSize,
+        h = math.ceil(rawGridSize.h / chunkSize) * chunkSize,
+    }
+
+    -- TODO check when to apply symmetry, rawGridSize or earlier\later
+    -- if verticalSymmetry then
+    --     rawGridSize.h = math.ceil(rawGridSize.h / 2)
+    -- end
+
+    -- if horizontalSymmetry then
+    --     rawGridSize.w = math.ceil(rawGridSize.w / 2)
+    -- end
+
     game.print(string.format('!!! raw grid size %s %s', rawGridSize.w, rawGridSize.h))
 
     local finalSize = {
@@ -464,7 +485,7 @@ function WFC:getGridSizeFromArea(area)
 
     game.print(string.format('!!! final grid size %s %s', finalSize.w, finalSize.h))
 
-    return finalSize
+    return finalSize, targetSize
 end
 
 -- #tag buildGrid
@@ -585,15 +606,6 @@ function WFC:getLowestEntropyCell(chunk, isFirstCell)
         end
     end
 
-    -- for _, cell in ipairs(grid) do
-    --     if not cell.isCollapsed then
-    --         if #cell.options < lowest then
-    --             result = cell
-    --             lowest = #cell.options
-    --         end
-    --     end
-    -- end
-
     if result == nil then
         game.print(string.format('no cell to collapse %s %s', result == nil, lowest))
         return nil
@@ -604,12 +616,6 @@ function WFC:getLowestEntropyCell(chunk, isFirstCell)
         return ERRORS.CELL_NO_OPTIONS
     end
 
-
-    -- if lowest == #self.values then
-    --     game.print('lowes is the same as max')
-    --     local rnd = math.random(1, #self.grid)
-    --     result = self.grid[rnd]
-    -- end
     -- game.print(string.format('  -- found cell to collapse %s', result.id))
     return result
 end
@@ -668,15 +674,6 @@ function WFC:propagateWave(grid)
                     end
                 end
             end
-
-            -- local res = c:updateOptions()
-            -- result = result or res
-            -- if res == "error" then
-            --     return "error"
-            -- end
-            -- if not result then
-            --     break
-            -- end
         end
     end
     return isAnythingUpdated
@@ -754,7 +751,7 @@ end
 function WFC:solve(finishCallback, stepCallback, chunkCallback)
     self:buildGrid()
 
-    local attempts = settings.global[settings_config.ATTEMPTS_LIMIT.name].value
+    local attempts = settings.global[settings_config.WFC_SOLVE_ATTEMPTS_LIMIT.name].value
     local attemptsForCurrentChunk = attempts
 
     local att = attempts
@@ -875,6 +872,10 @@ end
 
 -- #tag exportWithCoordinates
 function WFC:exportWithCoordinates()
+
+    game.print(string.format('WFC EXPORT        size %s %s', self.size.w, self.size.h))
+    game.print(string.format('WFC EXPORT target size %s %s', self.targetSize.w, self.targetSize.h))
+
     local result = {}
     for _, cell in ipairs(self.grid) do
         if cell.tileId == 0 then game.print('zero id') end
@@ -883,6 +884,30 @@ function WFC:exportWithCoordinates()
             y = cell.y,
             value = cell.tileId
         })
+
+        -- table.insert(result, {
+        --     x = self.targetSize.w - cell.x + 5 ,
+        --     y = cell.y,
+        --     value = cell.tileId,
+        --     rotated = 0,
+        --     reflected = 1
+        -- })
+
+        -- table.insert(result, {
+        --     x = cell.x,
+        --     y = self.targetSize.h - cell.y + 5,
+        --     value = cell.tileId,
+        --     rotated = 0,
+        --     reflected = 2
+        -- })
+
+        -- table.insert(result, {
+        --     x = self.targetSize.w - cell.x + 5,
+        --     y = self.targetSize.h - cell.y + 5,
+        --     value = cell.tileId,
+        --     rotated = 0,
+        --     reflected = 3
+        -- })
     end
     return result
 end

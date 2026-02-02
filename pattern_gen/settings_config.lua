@@ -7,30 +7,30 @@ return {
         setting_type = "runtime-global",
         default_value = false,
     },
-    INCLUDE_ROTATED = {
+    IMPORT_INCLUDE_ROTATED = {
         type = "bool-setting",
-        name = "include-rotated-tiles",
+        name = "import-include-rotated-tiles",
         setting_type = "runtime-global",
         default_value = true,
-        -- value = true
+
     },
-    INCLUDE_MIRRORED = {
+    IMPORT_INCLUDE_REFLECTED = {
         type = "bool-setting",
-        name = "include-mirrored-tiles",
+        name = "import-include-reflected-tiles",
         setting_type = "runtime-global",
         default_value = true,
-        -- value = true
+
     },
-    SKIP_INTERMEDIATE = {
+    IMPORT_SKIP_INTERMEDIATE = {
         type = "bool-setting",
-        name = "skip-intermediate-tiles",
+        name = "import-skip-intermediate-tiles",
         setting_type = "runtime-global",
         default_value = false,
         -- value = false
     },
-    TILE_SIZE = {
+    IMPORT_TILE_SIZE = {
         type = "int-setting",
-        name = "tile-size",
+        name = "import-tile-size",
         setting_type = "runtime-global",
         minimum_value = 2,
         maximum_value = 10,
@@ -39,73 +39,77 @@ return {
     },
 
     -- render settings
-    PRESERVE_EXISTING_TILES = {
+    RENDER_PRESERVE_EXISTING_TILES = {
         type = "bool-setting",
-        name = "preserve-existing-tiles",
+        name = "render-preserve-existing-tiles",
         setting_type = "runtime-global",
         default_value = true,
     },
-    AVOID_BUILDINGS = {
+    RENDER_AVOID_BUILDINGS = {
         type = "bool-setting",
-        name = "avoid-buildings",
+        name = "render-avoid-buildings",
         setting_type = "runtime-global",
         default_value = false,
     },
-    OUTLINE_BUILDINGS = {
+    RENDER_OUTLINE_BUILDINGS = {
         type = "bool-setting",
-        name = "outline-buildings",
+        name = "render-outline-buildings",
         setting_type = "runtime-global",
         default_value = false,
         -- value = false
     },
-    SPREAD = {
+    RENDER_SPREAD_TILES = {
         type = "bool-setting",
-        name = "spread-tiles",
+        name = "render-spread-tiles",
         setting_type = "runtime-global",
         default_value = false,
         -- value = false
     },
-    OVERLAP = {
+    RENDER_OVERLAP_TILES = {
         type = "bool-setting",
-        name = "overlap-tiles",
+        name = "render-overlap-tiles",
         setting_type = "runtime-global",
         default_value = true,
-        -- value = true
+
+    },
+
+    WFC_SYMMETRY_HORIZONTAL = {
+        type = "bool-setting",
+        name = "wfc-symmetry-horizontal",
+        setting_type = "runtime-global",
+        default_value = true,
+    },
+    WFC_SYMMETRY_VERTICAL = {
+        type = "bool-setting",
+        name = "wfc-symmetry-vertical",
+        setting_type = "runtime-global",
+        default_value = false,
     },
 
     -- wfc settings
-    CHUNK_SIZE = {
+    WFC_CHUNK_SIZE = {
         type = "int-setting",
-        name = "chunk-size",
+        name = "wfc-chunk-size",
         setting_type = "runtime-global",
         minimum_value = 2,
         maximum_value = 10,
         default_value = 3,
         -- value = false
     },
-    GRID_SIZE = {
-        type = "int-setting",
-        name = "grid-size",
-        setting_type = "runtime-global",
-        minimum_value = 5,
-        maximum_value = 50,
-        default_value = 10,
-        -- value = false
-    },
 
     -- wfc solving settings
-    ATTEMPTS_LIMIT = {
+    WFC_SOLVE_ATTEMPTS_LIMIT = {
         type = "int-setting",
-        name = "attempts-limit",
+        name = "wfc-solve-attempts-limit",
         setting_type = "runtime-global",
         minimum_value = 100,
         maximum_value = 10000,
         default_value = 100,
         -- value = false
     },
-    ATTEMPTS_PER_TICK = {
+    WFC_SOLVE_ATTEMPTS_PER_TICK = {
         type = "int-setting",
-        name = "attempts-per-tick",
+        name = "wfc-solve-attempts-per-tick",
         setting_type = "runtime-global",
         minimum_value = 1,
         maximum_value = 100,

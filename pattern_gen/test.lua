@@ -45,22 +45,23 @@ game = {
 settings = {
     global = {
         [settings_config.IMPORT_AS_TILES.name] = { value = false },
-        [settings_config.INCLUDE_ROTATED.name] = { value = true },
-        [settings_config.INCLUDE_MIRRORED.name] = { value = true },
-        [settings_config.SKIP_INTERMEDIATE.name] = { value = false },
-        [settings_config.TILE_SIZE.name] = { value = 3 },
+        [settings_config.IMPORT_INCLUDE_ROTATED.name] = { value = true },
+        [settings_config.IMPORT_INCLUDE_REFLECTED.name] = { value = true },
+        [settings_config.IMPORT_SKIP_INTERMEDIATE.name] = { value = false },
+        [settings_config.IMPORT_TILE_SIZE.name] = { value = 3 },
 
-        [settings_config.PRESERVE_EXISTING_TILES.name] = { value = true },
-        [settings_config.AVOID_BUILDINGS.name] = { value = false },
-        [settings_config.OUTLINE_BUILDINGS.name] = { value = false },
-        [settings_config.SPREAD.name] = { value = false },
-        [settings_config.OVERLAP.name] = { value = true },
+        [settings_config.RENDER_PRESERVE_EXISTING_TILES.name] = { value = true },
+        [settings_config.RENDER_AVOID_BUILDINGS.name] = { value = false },
+        [settings_config.RENDER_OUTLINE_BUILDINGS.name] = { value = false },
+        [settings_config.RENDER_SPREAD_TILES.name] = { value = false },
+        [settings_config.RENDER_OVERLAP_TILES.name] = { value = true },
 
-        [settings_config.CHUNK_SIZE.name] = { value = 3 },
-        [settings_config.GRID_SIZE.name] = { value = 6 },
+        [settings_config.WFC_CHUNK_SIZE.name] = { value = 3 },
+        [settings_config.WFC_SYMMETRY_HORIZONTAL.name] = { value = true },
+        [settings_config.WFC_SYMMETRY_VERTICAL.name] = { value = false },
 
-        [settings_config.ATTEMPTS_LIMIT.name] = { value = 1000 },
-        [settings_config.ATTEMPTS_PER_TICK.name] = { value = 10 },
+        [settings_config.WFC_SOLVE_ATTEMPTS_LIMIT.name] = { value = 1000 },
+        [settings_config.WFC_SOLVE_ATTEMPTS_PER_TICK.name] = { value = 10 },
     }
 }
 
