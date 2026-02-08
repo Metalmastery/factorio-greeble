@@ -63,7 +63,7 @@ Factorio mod for base decoration. Uses chunked WFC algorithm to fill area with t
 # Future
 - [ ] GUI
     - [ ] Select underlying tiles for entities
-- [ ] Import as tiles 
+- [x] Import as tiles 
 - [ ] WFC
     - [ ] Sparse templates
 - [ ] Code cleanup
@@ -76,3 +76,6 @@ Factorio mod for base decoration. Uses chunked WFC algorithm to fill area with t
 - main algorithm is in [wfc_chunks]('/pattern_gen/wfc_chunks.lua')
 - every frame N attempts to solve a chunk is made until attempts limit reached or every chunk is collapsed
 - backtracking is not efficient, see `backtrackAmount`
+
+# Additional
+![Celtic tileset blueprint] https://factoriocodex.com/blueprints/226

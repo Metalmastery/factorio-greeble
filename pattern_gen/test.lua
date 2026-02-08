@@ -1,5 +1,5 @@
 local Tile = require("pattern_gen/tile").Tile
-local Importer = require("pattern_gen/importer").Importer
+local Importer = require("pattern_gen/importer")
 local WFC = require("pattern_gen/wfc_chunks").WFC
 local Render = require("pattern_gen/render").Render
 local printTable = require("pattern_gen/utils").printTable

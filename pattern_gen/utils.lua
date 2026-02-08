@@ -16,10 +16,10 @@ local function printTable(t, indent, name)
             printTable(v, indent + 1, k)
         else
             -- If the value is another table, you need a custom function to print it recursively
-            game.print(string.format('%s%s: %s', indentString2, k, tostring(v)))
+            -- game.print(string.format('%s%s: %s', indentString2, k, tostring(v)))
         end
     end
-    game.print(string.format('%s }', indentString))
+    -- game.print(string.format('%s }', indentString))
 end
 
 return {

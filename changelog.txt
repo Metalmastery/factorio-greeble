@@ -4,3 +4,15 @@ Date: 2026-02-01
   Features:
     - Initial release
     - Provides a tool to repeatedly apply a tile pattern elsewhere
+
+Version: 0.0.2
+Date: 2026-02-04
+  Features:
+    - Fixed some crashes
+    - Added ability to use pre-made tilesets in addition to random samples
+
+Version: 0.0.3
+Date: 2026-02-04
+  Features:
+    - Removed debug messages and unused prints
+

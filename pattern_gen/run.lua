@@ -1,8 +1,7 @@
 local Tile = require("pattern_gen/tile").Tile
-local Importer = require("pattern_gen/importer").Importer
+local Importer = require("pattern_gen/importer")
 local WFC = require("pattern_gen/wfc_chunks").WFC
 local Render = require("pattern_gen/render").Render
-local printTable = require("pattern_gen/utils").printTable
 
 local settings_config = require('pattern_gen/settings_config')
 
@@ -95,6 +94,7 @@ end
 
 function testRun(event, tilesOnly)
     cleanupPreviousRun(event)
+
     local tileSize = settings.global[settings_config.IMPORT_TILE_SIZE.name].value
 
     tilesOnly = tilesOnly or false

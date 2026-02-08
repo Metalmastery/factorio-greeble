@@ -1,10 +1,14 @@
 local printTable = require("pattern_gen/utils").printTable
 local settings_config = require('pattern_gen/settings_config')
 
+---@class Render
+---@field tilesMap Tile[]
+---@field namesMap table
+---@field spread integer
+---@field tileSize integer
 local Render = {}
 Render.__index = Render
 
--- #region Render
 function Render.new(tilesMap, namesMap, tileSize, spread)
     local self = setmetatable({}, Render)
     self.tilesMap = tilesMap or {}
@@ -14,11 +18,12 @@ function Render.new(tilesMap, namesMap, tileSize, spread)
     return self
 end
 
+-- #tag outlineBox
 function Render:outlineBox(box, offset, tileName, tilesThrough)
     offset = offset or 0
     tileName = tileName or 'concrete'
 
-    --   game.print(serpent.line(box))
+    --   -- game.print(serpent.line(box))
     -- offset box around a box
     local tiles = tilesThrough or {}
     local offset = offset or 2
@@ -34,6 +39,7 @@ function Render:outlineBox(box, offset, tileName, tilesThrough)
     return tiles
 end
 
+-- #tag offsetBox
 function Render:offsetBox(box, offset)
     return {
         left_top = { x = box.left_top.x - offset, y = box.left_top.y - offset },
@@ -41,11 +47,12 @@ function Render:offsetBox(box, offset)
     }
 end
 
+-- #tag fillBox
 function Render:fillBox(box, offset, tileName, tilesThrough)
     offset = offset or 0
     tileName = tileName or 'concrete'
 
-    --   game.print(serpent.line(box))
+    --   -- game.print(serpent.line(box))
 
     local tiles = tilesThrough or {}
 
@@ -59,6 +66,7 @@ function Render:fillBox(box, offset, tileName, tilesThrough)
     return tiles
 end
 
+-- #tag roundBoxCoordinates
 function Render:roundBoxCoordinates(box)
     -- for _, box in ipairs(boxes) do
     box.left_top.x = math.floor(box.left_top.x)
@@ -68,6 +76,7 @@ function Render:roundBoxCoordinates(box)
     -- end
 end
 
+-- #tag getContainingBox
 function Render:getContainingBox(entities)
     local combinedBox = entities[1].bounding_box
 
@@ -89,7 +98,45 @@ local function merge_lists(t1, t2)
     return t1
 end
 
+-- #tag getBestMatchingTile
+---@param code string
+---@param data any[]
+---@return Tile|nil
+function Render:getBestMatchingTile(tileToMatch, reflectionIndex)
 
+    local code = tileToMatch.reflectedCodes[reflectionIndex]
+
+    local matches = {}
+    local bestMatches = {}
+
+    for _, tile in pairs(self.tilesMap) do
+        if tile.code == code then
+            table.insert(matches, tile)
+
+            if tile.originalID == tileToMatch.originalID then
+                table.insert(bestMatches, tile)
+            end
+        end
+    end
+
+    if #matches == 0 then
+        return nil
+    end
+
+    if #bestMatches > 0 then
+        return bestMatches[math.random(#bestMatches)]
+    end
+
+    -- game.print(string.format('getBestMatchingTile %s found for code %s', #matches, code))
+
+    return matches[math.random(#matches)]
+end
+
+-- #tag makeJSON
+---comment
+---@param wfcData { size: Size, tiles: ExportCell[] }
+---@param event any
+---@return { name: string, position: Point }[]
 function Render:makeJSON(wfcData, event)
     self:roundBoxCoordinates(event.area)
 
@@ -103,41 +150,102 @@ function Render:makeJSON(wfcData, event)
     local preserveTiles = settings.global[settings_config.RENDER_PRESERVE_EXISTING_TILES.name].value
 
     local bpTiles = {}
-    -- local tileSize = self.tilesMap[wfcData[1].value or 0].data.length -- fix this mess
-    -- this.tilesMap[wfcData[0].value || 0].data.length
+    
     local tileSize = self.tileSize
-    for _, t in ipairs(wfcData) do
+
+    local tileSizeAdjusted = tileSize
+    if overlapSetting then
+        tileSizeAdjusted = tileSizeAdjusted - 1
+    end
+
+    local totalGridSize = {
+        w = wfcData.size.w * tileSizeAdjusted,
+        h = wfcData.size.h * tileSizeAdjusted
+    }
+
+    local selectedAreaSize = {
+        w = event.area.right_bottom.x - event.area.left_top.x,
+        h = event.area.right_bottom.y - event.area.left_top.y
+    }
+
+    -- TODO use half excess to center symmetric patterns in selected area
+    local excess = {
+        w = totalGridSize.w - selectedAreaSize.w,
+        h = totalGridSize.h - selectedAreaSize.h
+    }
+
+    game.print(string.format('totalGridSize %s, %s', totalGridSize.w, totalGridSize.h))
+    game.print(string.format('selectedAreaSize %s, %s', selectedAreaSize.w, selectedAreaSize.h))
+    game.print(string.format('excess %s, %s', excess.w, excess.h))
+
+    for _, t in ipairs(wfcData.tiles) do
         if t.value then -- handle broken tiles
             local tile = self.tilesMap[t.value]
             local data = tile.data
-
-            -- -- TODO make it better
-            -- if t.rotated and t.rotated > 0 then
-            --     data = tile.rotations[t.rotated]
-            -- end
-
-            -- if t.reflected and t.reflected > 0 then
-            --     data = tile.reflections[t.reflected]
-            -- end
+            local tileCode = tile.code
 
             local startPositionX = 0
             local startPositionY = 0
+            local includeTiles = tileSize - 1
 
-            if overlapSetting and t.x > 0 then startPositionX = 1 end
-            if overlapSetting and t.y > 0 then startPositionY = 1 end
+            if overlapSetting then
+                includeTiles = tileSize - 2
+            end
 
-            for row = startPositionY, tileSize - 1 do
-                for column = startPositionX, tileSize - 1 do
+            if t.reflected then
+                data = tile.reflections[t.reflected]
+                -- tileCode = tile.reflectedCodes[t.reflected]
+
+                local bestMatchingTile = self:getBestMatchingTile(tile, t.reflected)
+
+                if bestMatchingTile then
+                    data = bestMatchingTile.data
+                end
+
+                -- TODO refactor this
+                if overlapSetting then
+                    if t.reflected == 1 then
+                        startPositionX = 1
+                    end
+
+                    if t.reflected == 2 then
+                        startPositionY = 1
+                    end
+
+                    if t.reflected == 3 then
+                        startPositionX = 1
+                        startPositionY = 1
+                    end
+                end
+            end
+
+            local test = includeTiles + 1
+
+            local tilePosition = {
+                x = t.x * (test + self.spread) + origin.x,
+                y = t.y * (test + self.spread) + origin.y,
+            }
+
+            for row = startPositionY, startPositionY + includeTiles do
+                for column = startPositionX, startPositionX + includeTiles do
                     local bpTile = {
+
                         position = {
-                            x = t.x * (tileSize + self.spread - startPositionX) + column + origin.x,
-                            y = t.y * (tileSize + self.spread - startPositionY) + row + origin.y,
+                            x = tilePosition.x + column,
+                            y = tilePosition.y + row,
                         },
+
                         name = self.namesMap.inverseNames[
-                            data[row + 1][column + 1]
+                        data[row + 1][column + 1]
                         ],
                     }
-                    -- TODO skip tiles under buildings
+
+                    if bpTile.position.x > event.area.right_bottom.x or bpTile.position.y > event.area.right_bottom.y then
+                        goto continue
+                    end
+
+                    -- -- game.print(string.format('render tile %s row=%s column=%s at %s %s', bpTile.name, row, column,
+                    --     bpTile.position.x, bpTile.position.y))
 
                     if avoidBuildings and not surface.can_place_entity({ name = 'stone-wall', position = bpTile.position, inner_name = bpTile.name, force = player.force }) then
                         goto continue
@@ -162,7 +270,7 @@ end
 -- for _, ent in ipairs(event.entities) do
 --     local cb = ent.type
 --     if cb then
---       game.print(cb)
+--       -- game.print(cb)
 --     end
 
 --     roundBoxCoordinates(ent.bounding_box)
@@ -173,14 +281,15 @@ end
 --     tiles = fillBox(ent.bounding_box, 0, 'refined-concrete')
 --     event.surface.set_tiles(tiles, true, true, true, true, game.players[event.player_index])
 --   end
+-- #tag renderTiles
 function Render:renderTiles(origin)
     local bpTiles = {}
 
     local t1 = 0
     local t2 = 0
 
-    game.print(string.format('tiles to render %s', #self.tilesMap))
-    game.print(string.format('at position %s %s', origin.x, origin.y))
+    -- game.print(string.format('tiles to render %s', #self.tilesMap))
+    -- game.print(string.format('at position %s %s', origin.x, origin.y))
 
     local tileSize = self.tileSize
 
@@ -210,7 +319,7 @@ function Render:renderTiles(origin)
         -- end
     end
 
-    game.print(string.format('game tiles rendered %s of %s', t1, #bpTiles))
+    -- game.print(string.format('game tiles rendered %s of %s', t1, #bpTiles))
 
     return bpTiles
 end
@@ -218,4 +327,3 @@ end
 return {
     Render = Render
 }
--- #endregion

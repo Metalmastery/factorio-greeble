@@ -6,7 +6,7 @@ local planner_name = "greeble"
 local testRun = require("pattern_gen/run").testRun
 
 local function on_player_selected_area(event)
-  game.print('left click')
+  -- game.print('getting sample')
   local item = event.item
   if item == planner_name then
     local min_x = math.huge
@@ -51,7 +51,7 @@ end
 -- end
 
 local function draw_tiles(event)
-  game.print('draw_tiles')
+  -- game.print('draw_tiles')
   local item = event.item
   local instant_build = true
   if not storage.tile_templates[event.player_index] then return end
@@ -69,7 +69,7 @@ local function draw_tiles(event)
 end
 
 local function draw_pattern(event)
-  game.print('draw_pattern')
+  -- game.print('draw_pattern')
   local item = event.item
   local instant_build = true
   if not storage.tile_templates[event.player_index] then return end
@@ -90,17 +90,17 @@ local function on_mod_settings_update(event)
   local player = game.players[event.player_index]
   local val = settings.global[event.setting].value
 
-  game.print(string.format('setting updated %s %s', event.setting, val))
+  -- game.print(string.format('setting updated %s %s', event.setting, val))
 end
 
 script.on_init(function()
   if not storage.tile_templates then
-    game.print('create tile_templates')
+    -- game.print('create tile_templates')
     storage.tile_templates = {}
   end
 
   if not storage.greeble_previous_run then
-    game.print('create greeble_previous_run')
+    -- game.print('create greeble_previous_run')
     storage.greeble_previous_run = nil
   end
 end)
@@ -112,7 +112,7 @@ script.on_configuration_changed(function()
 end)
 
 script.on_event("greeble-open-menu", function(event)
-  game.print("Keyboard shortcut pressed on tick: " .. tostring(event.tick))
+  -- game.print("Keyboard shortcut pressed on tick: " .. tostring(event.tick))
 
   -- player.gui.center
 

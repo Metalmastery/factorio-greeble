@@ -58,14 +58,23 @@ local function _getAllDataReflections(data)
     return { newDataH, newDataV, newDataDiagonal }
 end
 
--- Tile class
+---@class Tile (exact)
+---@field type string
+---@field size integer
+---@field frequency integer
+---@field id integer
+---@field originalID integer reference to tile from which rotation\reflection is created
+---@field edges table
+---@field code string
+---@field data table[]
+---@field reflectedCodes string[]
+---@field reflections any
+---@field rotations any
 local Tile = {}
+
 Tile.__index = Tile
 Tile._idBase = 1
 
--- #region Tile
-
----@class Tile
 Tile.TYPE = {
     ORIGINAL = 'ORIGINAL',
     MIRROR = 'MIRROR',
@@ -73,18 +82,17 @@ Tile.TYPE = {
     MIRROR_ROTATED = 'MIRROR_ROTATED'
 }
 
+
 ---@return Tile
 function Tile.new(size)
-    -- game.print('tile created')
+    -- -- game.print('tile created')
     local self = setmetatable({}, Tile)
-
-    -- self.type = Tile.TYPE.ORIGINAL
-    self.type = 'ORIGINAL'
 
     size = size or 3
     self.size = size
     self.frequency = 1
     self.id = Tile._idBase
+    self.originalID = self.id
     Tile._idBase = Tile._idBase + 1
 
     self.edges = {}
@@ -105,6 +113,7 @@ function Tile.new(size)
     end
 
     self.rotations = {}
+    self.reflections = {}
 
     return self
 end
@@ -114,7 +123,7 @@ end
 function Tile:computeEdges()
     -- TODO move this out
     -- self.rotations = _getAllDataRotations(self.data)
-    -- self.reflections = _getAllDataReflections(self.data)
+    self.reflections = _getAllDataReflections(self.data)
 
     -- TOP edge (first row)
     local topParts = {}
@@ -134,12 +143,6 @@ function Tile:computeEdges()
     self.edges[DIRECTION.LEFT] = table.concat(leftParts, "-")
     self.edges[DIRECTION.RIGHT] = table.concat(rightParts, "-")
 
-    -- self.edges[DIRECTION.TOP] = table.concat(bottomParts, "-")
-    -- self.edges[DIRECTION.BOTTOM] = table.concat(topParts, "-")
-
-    -- self.edges[DIRECTION.LEFT] = table.concat(rightParts, "-")
-    -- self.edges[DIRECTION.RIGHT] = table.concat(leftParts, "-")
-
     local codeTable = {
         self.edges[DIRECTION.TOP],
         self.edges[DIRECTION.RIGHT],
@@ -148,7 +151,9 @@ function Tile:computeEdges()
     }
     -- Create code from all edges
     self.code = table.concat(codeTable, ".")
-    -- game.print(self.code)
+
+    self.reflectedCodes = self:getReflectedCodes(self.edges)
+    -- -- game.print(self.code)
 end
 
 -- #tag getRotatedData
@@ -157,6 +162,44 @@ end
 
 -- #tag getReflectedData
 function Tile:getReflectedData()
+end
+
+-- #tag getRotatedEdges
+function Tile:getRotatedEdges(data)
+end
+
+-- #tag getReflectedEdges
+function Tile:getReflectedEdges()
+end
+
+-- #tag getReflectedCodes
+---@param edges string[]
+---@return string[]
+function Tile:getReflectedCodes(edges)
+    local reflectedCodes = {}
+
+    table.insert(reflectedCodes, table.concat({
+        edges[DIRECTION.TOP],
+        edges[DIRECTION.LEFT],
+        edges[DIRECTION.BOTTOM],
+        edges[DIRECTION.RIGHT]
+    }, '.'))
+
+    table.insert(reflectedCodes, table.concat({
+        edges[DIRECTION.BOTTOM],
+        edges[DIRECTION.RIGHT],
+        edges[DIRECTION.TOP],
+        edges[DIRECTION.LEFT]
+    }, '.'))
+
+    table.insert(reflectedCodes, table.concat({
+        edges[DIRECTION.BOTTOM],
+        edges[DIRECTION.LEFT],
+        edges[DIRECTION.TOP],
+        edges[DIRECTION.RIGHT]
+    }, '.'))
+
+    return reflectedCodes
 end
 
 ---@return Tile[]
@@ -177,7 +220,9 @@ function Tile:getAllRotations()
 
         newData = rotated
 
+
         local newTile = Tile.new(self.size)
+        newTile.originalID = self.originalID
 
         -- Deep copy the rotated data
         for i = 1, #newData do
@@ -187,18 +232,6 @@ function Tile:getAllRotations()
         end
 
         newTile:computeEdges()
-
-        -- if self.type == Tile.TYPE.ORIGINAL then
-        --     newTile.type = Tile.TYPE.ORIGINAL_ROTATED
-        -- end
-
-        -- if self.type == Tile.TYPE.MIRROR then
-        --     newTile.type = Tile.TYPE.MIRROR_ROTATED
-        -- else
-        --     newTile.type = 'wtf'
-        -- end
-
-        newTile.type = self.type .. '_ROTATED'
 
         table.insert(rotatedClones, newTile)
     end
@@ -216,6 +249,10 @@ function Tile:getReflected()
     local newTileH = Tile.new(self.size)
     local newTileDiagonal = Tile.new(self.size)
 
+    newTileV.originalID = self.originalID
+    newTileH.originalID = self.originalID
+    newTileDiagonal.originalID = self.originalID
+
     -- Deep copy data
     for i = 1, #newData do
         for j = 1, #newData[i] do
@@ -229,7 +266,6 @@ function Tile:getReflected()
 
     for i = 1, #newData do
         reverse_table_inplace(newTileH.data[i])
-        -- reverse_table_inplace(newTileDiagonal.data[i])
     end
 
     reverse_table_inplace(newTileV.data)
@@ -238,14 +274,6 @@ function Tile:getReflected()
     newTileH:computeEdges()
     newTileV:computeEdges()
     newTileDiagonal:computeEdges()
-
-    newTileV.type = self.type .. '_MIRROR'
-    newTileH.type = self.type .. '_MIRROR'
-    newTileDiagonal.type = self.type .. '_MIRROR'
-
-    -- newTileV.type = Tile.TYPE.MIRROR
-    -- newTileH.type = Tile.TYPE.MIRROR
-    -- newTileDiagonal.type = Tile.TYPE.MIRROR
 
     table.insert(mirrorClones, newTileH)
     table.insert(mirrorClones, newTileV)
@@ -261,16 +289,8 @@ function Tile:isOverlapping(other, direction)
 
     local oppositeDirection = ((direction + 1) % 4) + 1
 
-    -- if self.edges[direction] ~= other.edges[oppositeDirection] then
-    --     print(direction, oppositeDirection, getmetatable(other) == Tile, self.id, other.id)
-    --     game.print(string.format('overlap %s %s %s', self.edges[direction] == other.edges[oppositeDirection],
-    --         self.edges[direction], other.edges[oppositeDirection]))
-    -- end
-
     return self.edges[direction] == other.edges[oppositeDirection]
 end
-
--- #endregion Tile
 
 return {
     Tile = Tile,

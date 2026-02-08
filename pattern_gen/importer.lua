@@ -8,7 +8,6 @@ local settings_config = require('pattern_gen/settings_config')
 local Importer = {}
 Importer.__index = Importer
 
--- #region Importer
 function Importer.new(tileSize)
     local self = setmetatable({}, Importer)
 
@@ -153,14 +152,16 @@ function Importer:extractTiles(grid, size)
                 variations = initial
             end
 
+            local removeDuplicates = false
+
             local discarded = 0
             for _, var in ipairs(variations) do
-                if unique[var.code] then
+                if unique[var.code] and removeDuplicates then
                     -- Increment frequency for duplicate
-                    -- game.print(string.format('   rotation code freq++ %s %s', tileMap[rot.code].frequency, rot.code))
+                    -- -- game.print(string.format('   rotation code freq++ %s %s', tileMap[rot.code].frequency, rot.code))
                     tileMap[var.code].frequency = tileMap[var.code].frequency + 1
                 else
-                    -- game.print(string.fqormat('rotation code unique %s', rot.code))
+                    -- -- game.print(string.fqormat('rotation code unique %s', rot.code))
                     tileMap[var.code] = var
                     table.insert(tiles, var)
                     unique[var.code] = true
@@ -169,7 +170,7 @@ function Importer:extractTiles(grid, size)
                 end
             end
 
-            -- game.print(string.format('discarded %s of %s tiles as duplicates for tile %s', discarded, #variations, tile.code))
+            -- -- game.print(string.format('discarded %s of %s tiles as duplicates for tile %s', discarded, #variations, tile.code))
         end
     end
 
@@ -206,7 +207,7 @@ function Importer:relocateToZero(bp)
         tile.position.y = tile.position.y - smallestY
 
         -- if tile.position.x == 0 or tile.position.y == 0 then
-        --     game.print('importer position zero')
+        --     -- game.print('importer position zero')
         -- end
     end
 
@@ -221,27 +222,25 @@ function Importer:importBlueprint(importBp)
 
     self.namesMap = self:extractNamesMap(sourceTiles)
 
-    game.print(table.concat(self.namesMap.inverseNames, ','))
+    -- game.print(table.concat(self.namesMap.inverseNames, ','))
 
     local grid = self:buildSourceGrid(sourceTiles)
 
-    game.print(string.format('importer grid size %s %s', #grid, #grid[1]))
+    -- game.print(string.format('importer grid size %s %s', #grid, #grid[1]))
 
     local tiles = self:extractTiles(grid, self.tileSize)
 
-    game.print(string.format('tiles extracted %s', #tiles))
+    -- game.print(string.format('tiles extracted %s', #tiles))
 
     local tilesMap = self:makeTileMap(tiles)
 
-    game.print(string.format('tilemap size %s', #tilesMap))
+    -- game.print(string.format('tilemap size %s', #tilesMap))
 
     return {
         namesMap = self.namesMap,
         tilesMap = tilesMap
     }
 end
-
--- #endregion Importer
 
 -- Helper function to check if value exists in table (acts like array.includes())
 local function tableContains(tbl, value)
@@ -253,6 +252,4 @@ local function tableContains(tbl, value)
     return false
 end
 
-return {
-    Importer = Importer,
-}
+return Importer
