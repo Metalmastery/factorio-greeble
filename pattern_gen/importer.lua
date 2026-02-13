@@ -102,7 +102,8 @@ end
 -- }
 
 -- #tag extractTiles
-function Importer:extractTiles(grid, size)
+function Importer:extractTiles(grid, size, removeDuplicates)
+    removeDuplicates = removeDuplicates or false
     local sourceH = #grid
     local sourceW = #grid[1]
 
@@ -151,8 +152,6 @@ function Importer:extractTiles(grid, size)
             else
                 variations = initial
             end
-
-            local removeDuplicates = false
 
             local discarded = 0
             for _, var in ipairs(variations) do
@@ -215,7 +214,7 @@ function Importer:relocateToZero(bp)
 end
 
 -- #tag importBlueprint
-function Importer:importBlueprint(importBp)
+function Importer:importBlueprint(importBp, removeDuplicates)
     local bp = self:relocateToZero(importBp)
     -- local bp = importBp
     local sourceTiles = bp.blueprint.tiles
@@ -228,7 +227,7 @@ function Importer:importBlueprint(importBp)
 
     -- game.print(string.format('importer grid size %s %s', #grid, #grid[1]))
 
-    local tiles = self:extractTiles(grid, self.tileSize)
+    local tiles = self:extractTiles(grid, self.tileSize, removeDuplicates)
 
     -- game.print(string.format('tiles extracted %s', #tiles))
 

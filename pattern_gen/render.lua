@@ -99,11 +99,10 @@ local function merge_lists(t1, t2)
 end
 
 -- #tag getBestMatchingTile
----@param code string
----@param data any[]
+---@param tileToMatch Tile
+---@param reflectionIndex integer
 ---@return Tile|nil
 function Render:getBestMatchingTile(tileToMatch, reflectionIndex)
-
     local code = tileToMatch.reflectedCodes[reflectionIndex]
 
     local matches = {}
@@ -150,7 +149,7 @@ function Render:makeJSON(wfcData, event)
     local preserveTiles = settings.global[settings_config.RENDER_PRESERVE_EXISTING_TILES.name].value
 
     local bpTiles = {}
-    
+
     local tileSize = self.tileSize
 
     local tileSizeAdjusted = tileSize
@@ -174,9 +173,9 @@ function Render:makeJSON(wfcData, event)
         h = totalGridSize.h - selectedAreaSize.h
     }
 
-    game.print(string.format('totalGridSize %s, %s', totalGridSize.w, totalGridSize.h))
-    game.print(string.format('selectedAreaSize %s, %s', selectedAreaSize.w, selectedAreaSize.h))
-    game.print(string.format('excess %s, %s', excess.w, excess.h))
+    -- game.print(string.format('totalGridSize %s, %s', totalGridSize.w, totalGridSize.h))
+    -- game.print(string.format('selectedAreaSize %s, %s', selectedAreaSize.w, selectedAreaSize.h))
+    -- game.print(string.format('excess %s, %s', excess.w, excess.h))
 
     for _, t in ipairs(wfcData.tiles) do
         if t.value then -- handle broken tiles
@@ -251,7 +250,22 @@ function Render:makeJSON(wfcData, event)
                         goto continue
                     end
 
-                    if preserveTiles and not surface.can_place_entity({ name = 'tile-ghost', position = bpTile.position, inner_name = bpTile.name, force = player.force }) then
+                    if not bpTile.name then
+                        goto continue
+                    end
+                    -- local canPlaceTileGhost = surface.can_place_entity({ name = 'tile-ghost', position = bpTile.position, inner_name =
+                    -- bpTile.name, force = player.force })
+                    -- game.print(string.format('preserve tiles %s %s %s', preserveTiles, canPlaceTileGhost, preserveTiles and not canPlaceTileGhost))
+
+                    -- TODO find a good way to only preserve player's tiles
+                    local tileInPlace = surface.get_tile(bpTile.position)
+                    -- local canPlaceTileGhost = not tileInPlace.prototype.can_be_part_of_blueprint
+
+                    -- TODO is there a better way to preserve tiles?
+                    local canPlaceTileGhost = tileInPlace.prototype.subgroup.name ~= 'artificial-tiles'
+
+                    if preserveTiles and not canPlaceTileGhost then
+                        -- game.print(string.format('preserving existing floor for %s %s', tileInPlace.prototype.subgroup.name, canPlaceTileGhost))
                         goto continue
                     end
 

@@ -92,10 +92,64 @@ local function mergeTiles(table1, table2)
     return result
 end
 
-function testRun(event, tilesOnly)
+local function isAreaGood(event)
+    local tileSize = settings.global[settings_config.IMPORT_TILE_SIZE.name].value
+    local selectedAreaSize = {
+        w = event.area.right_bottom.x - event.area.left_top.x,
+        h = event.area.right_bottom.y - event.area.left_top.y
+    }
+
+    return selectedAreaSize.w > tileSize and selectedAreaSize.h > tileSize
+end
+
+local function selectTemplate(event)
+    game.print(string.format('select template %s', event.item))
+    if not isAreaGood(event) then
+        game.print('sample is too small for greeble')
+        return;
+    end
+
+    local planner_name = 'greeble'
+
+    local item = event.item
+    if item == planner_name then
+        local min_x = math.huge
+        local min_y = math.huge
+        local max_x = -math.huge
+        local max_y = -math.huge
+
+        for _, tile in pairs(event.tiles) do
+            min_x = math.min(tile.position.x, min_x)
+            min_y = math.min(tile.position.y, min_y)
+            max_x = math.max(tile.position.x, max_x)
+            max_y = math.max(tile.position.y, max_y)
+        end
+        local tiles = {}
+        for _, tile in pairs(event.tiles) do
+            local new_position = { x = tile.position.x - min_x, y = tile.position.y - min_y }
+            table.insert(tiles, { name = tile.name, position = new_position })
+        end
+        if not storage.tile_templates then
+            storage.tile_templates = {}
+        end
+        storage.tile_templates[event.player_index] = {
+            tiles = tiles,
+            width = max_x - min_x + 1,
+            height = max_y - min_y + 1
+        }
+    end
+end
+
+local function testRun(event, tilesOnly)
+    if not isAreaGood(event) then
+        game.print('area is too small for greeble')
+        return;
+    end
+
     cleanupPreviousRun(event)
 
     local tileSize = settings.global[settings_config.IMPORT_TILE_SIZE.name].value
+    local removeDuplicates = settings.global[settings_config.IMPORT_REMOVE_DUPLICATES.name].value
 
     tilesOnly = tilesOnly or false
     -- reset id for tiles?
@@ -107,7 +161,7 @@ function testRun(event, tilesOnly)
     local importer = Importer.new(tileSize)
 
     -- TODO build grid based on size, not tiles -> fill up missing spots to alllow sparse templates
-    local importedData = importer:importBlueprint({ blueprint = { tiles = template.tiles } })
+    local importedData = importer:importBlueprint({ blueprint = { tiles = template.tiles } }, removeDuplicates)
 
     local spreadSetting = settings.global[settings_config.RENDER_SPREAD_TILES.name].value
     local render = Render.new(importedData.tilesMap, importedData.namesMap, tileSize, (spreadSetting and 1 or 0))
@@ -155,8 +209,14 @@ function testRun(event, tilesOnly)
 
     frame.add { type = "label", caption = "Chunks solved" }
     local progressbar = frame.add { type = "progressbar" }
-    local cancelButton = frame.add { type = "button" }
+
+    local buttons = frame.add { type = "flow" }
+
+    local cancelButton = buttons.add { type = "button" }
     cancelButton.caption = "Cancel"
+
+    local restartButton = buttons.add { type = "button" }
+    restartButton.caption = "Restart"
 
     local originalEvent = event
 
@@ -227,15 +287,9 @@ function testRun(event, tilesOnly)
             end
         end
     end)
-
-
-    -- printTable(wfcSimpleData)
-
-    -- printTable(result)
 end
 
 return {
-    testRun = testRun
+    testRun = testRun,
+    selectTemplate = selectTemplate
 }
-
--- testRun()

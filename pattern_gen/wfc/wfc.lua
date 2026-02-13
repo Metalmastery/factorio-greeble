@@ -511,8 +511,6 @@ function WFC:solve(finishCallback, stepCallback, chunkCallback)
     end
 
     self.cycleFunc()
-    -- For Factorio, you'd need to implement this differently
-    -- using game.on_nth_tick or similar event handlers
     return nil
 end
 
@@ -526,6 +524,8 @@ end
 -- #tag exportWithCoordinates
 ---@return ExportCell[]
 function WFC:exportWithCoordinates()
+
+    -- TODO fix symmetry for odd grid size
     local verticalSymmetry = settings.global[settings_config.WFC_SYMMETRY_VERTICAL.name].value
     local horizontalSymmetry = settings.global[settings_config.WFC_SYMMETRY_HORIZONTAL.name].value
 

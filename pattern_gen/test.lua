@@ -44,7 +44,7 @@ game = {
 
 settings = {
     global = {
-        [settings_config.IMPORT_AS_TILES.name] = { value = false },
+        [settings_config.IMPORT_REMOVE_DUPLICATES.name] = { value = false },
         [settings_config.IMPORT_INCLUDE_ROTATED.name] = { value = true },
         [settings_config.IMPORT_INCLUDE_REFLECTED.name] = { value = true },
         [settings_config.IMPORT_SKIP_INTERMEDIATE.name] = { value = false },
